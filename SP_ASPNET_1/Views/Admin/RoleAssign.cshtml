@@ -1,0 +1,117 @@
+﻿@model SP_ASPNET_1.ViewModels.AuthorRolesModel
+
+@{
+    ViewBag.Title = "RoleAssign";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@if (TempData["MessageAdmin"] != null)
+{
+    <p class="alert alert-danger" id="successMessage">@TempData["MessageAdmin"] </p>
+}
+
+<h2>RoleAssign</h2>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <h4>AuthorRolesModel</h4>
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="form-group">
+            @Html.LabelFor(model => model.UserRoleName, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                <select name="drpRolelist" id="droprolelist" class="form-control" style="width:200px">
+                    @{
+                        foreach (var list in ViewBag.populateRolelist)
+                        {
+                            <option value="@list.Value"
+                                    data-desc="@list.Text">
+                                @list.Text
+                            </option>
+                        }
+                    }
+                </select>
+
+                @Html.ValidationMessageFor(model => model.UserRoleName, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.UserName, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @*@Html.EditorFor(model => model.UserName, new { htmlAttributes = new { @class = "form-control" } })*@
+                <select name="drpUserlist" id="dropuserlist" class="form-control" style="width:200px">
+                    <option value="0">select</option>
+
+                    @{
+                        foreach (var list in ViewBag.populateAuthorlist)
+                        {
+                            <option value="@list.AuthorID"
+                                    data-desc="@list.UserEmailid">
+                                @list.Name
+                            </option>
+                        }
+                    }
+                </select>
+                @Html.ValidationMessageFor(model => model.UserName, "", new { @class = "text-danger" })
+
+                <input type="text" id="txtProductDescription" class="form-control" style="width:200px;" disabled />
+
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="button" id="btn-submit" value="Create" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#dropuserlist").change(function () {
+
+            var selectedItemDesc = $("#dropuserlist option:selected").attr("data-desc");
+               $("#txtProductDescription").val(selectedItemDesc);
+            var selectedAuthId = $(this).val();
+        });
+
+        $("#droprolelist").change(function () {
+
+            var selectedItemDesc = $("#droprolelist option:selected").attr("data-desc");
+
+            var selectedroleId = $(this).val();
+        });
+
+         $("#btn-submit").click(function () {
+
+              $.ajax({
+
+                    type: 'Post',
+                    dataType: 'Json',
+                  data: {
+                      "Authid": $("#dropuserlist").val(), "RoleIds": $("#droprolelist").val()},
+                    url: '@Url.Action("RoleAssign", "Admin")',
+                    async : true,
+                    success: function () {
+                        alert("success");
+
+                },
+                error: function () {
+                    alert("Error: Please select role/user.");
+                }
+                });
+            });
+
+        });
+
+
+</script>

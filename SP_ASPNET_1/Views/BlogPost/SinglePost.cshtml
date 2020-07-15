@@ -1,0 +1,226 @@
+﻿@using SP_ASPNET_1.BusinessLogic
+@model SP_ASPNET_1.ViewModels.BlogSinglePostViewModel
+
+
+
+@*@{
+        ViewBag.Title = "SinglePost";
+    }*@
+@{ Layout = "~/Views/Shared/Blog/_BlogLayout.cshtml"; }
+
+@using (Html.BeginForm())
+{
+  
+    if (Model != null)
+    { 
+        <div class="SinglePost">
+        <img src="@Html.AttributeEncode(Constants.POST_IMAGE_PREFIX + Model.BlogPost.ImageUrl)" alt="@Path.GetFileNameWithoutExtension(Model.BlogPost.ImageUrl)" />
+        <h2>new chills for summer</h2>
+        <p>By @Model.Author.ToString() on @Model.BlogPost.DateTime.ToString(Constants.DISPLAY_DATETIME_FORMAT)</p>
+        <p>
+            @Model.BlogPost.Content
+        </p>
+        <p>
+            @if (User.IsInRole("Admin") || User.IsInRole("Author"))
+            {
+                if ((int)@Session["UserID"] == @Model.BlogPost.AuthorID)
+                {
+                    @Html.ActionLink("Edit|", "EditBlogPost", new { id = Model.BlogPost.BlogPostID })
+                    @Html.ActionLink("Back to List|", "Index")
+                    <a href="#" class="Delete" id="deletepost" data-id="@Model.BlogPost.BlogPostID">Delete</a>}
+            }
+            
+            @Html.Hidden("BlogPostId", Model.BlogPost.BlogPostID, new { @id = "BlogPostId" })
+            <input type="button" id="btn_like" value="Like" class="btn btn-info">
+            @Html.TextBoxFor(model => Model.BlogPost.Like, new { @readonly = "readonly", @style = "border: none" })
+            <div id="counter"></div>
+            <div id="PostId"></div>
+        </p>
+        <p>
+            @if (@Session["UserID"] == null)
+            {
+            <input type="button" id="btn_Comment" style="float:right;" value="Add Comment" class="btn btn-default c-btn" />
+            <div id="login"></div>
+            }
+            else
+            {
+            <div id="commentsBlock" style="border: 1px solid #f1eaea; background-color: #eaf2ff;">
+                <div class="AddComment" style="margin-left: 30%;  margin-bottom: 5px; margin-top: 8px;">
+                    <input type="text" id="@string.Format("{0}_{1}", "comment",Model.BlogPost.BlogPostID)" class="form-control" placeholder="Add a Comment ..." style="display: inline;" />
+                    <button type="button" id="btn_createcomment" class="btn btn-default addComment" data-id="@Model.BlogPost.BlogPostID" value="Create">Create</button>
+                </div>
+            </div>
+            }
+            @*<div id="Login" style="border: 1px solid #f1eaea; background-color: #eaf2ff;">
+            <div class="Login" style="margin-left: 30%;  margin-bottom: 5px; margin-top: 8px;">
+
+                <input type="text" id="UserName" placeholder="Enter EmailId...." style="display: inline;" />
+                <input type="text" id="UserPwd" placeholder="Enter  Password...." style="display: inline;" />
+                <input type="button" id="btn_Login" class="btn btn-default" value="Login">
+            </div>
+        </div>*@
+        </p>
+        @*<div id="commentsBlock" style="border: 1px solid #f1eaea; background-color: #eaf2ff;">*@
+        <div id="@string.Format("{0}_{1}","commentsBlock",Model.BlogPost.BlogPostID)" style="border: 1px solid #f1eaea; background-color: #eaf2ff;">
+            @*<div id="commentsBlock" style="border: 1px solid #f1eaea; background-color: #eaf2ff;">
+                <div class="AddComment" style="margin-left: 30%;  margin-bottom: 5px; margin-top: 8px;">
+                    <input type="text" id="@string.Format("{0}_{1}", "comment",Model.BlogPost.BlogPostID)" class="form-control" placeholder="Add a Comment ..." style="display: inline;" />
+                    <button type="button" id="btn_createcomment" class="btn btn-default addComment" data-id="@Model.BlogPost.BlogPostID" value="Create"></button>
+                </div>
+            </div>*@
+        </div>
+        
+        
+        <p>
+            <div><input type="button" id="btn_showcomment" style="float:left;" data-id="@Model.BlogPost.BlogPostID" value="Show Comments" class="btn btn-default c-btn" /></div>
+        </p>
+    </div>
+
+    }
+
+    else
+    {
+        <div class="SinglePost">
+            <h2>There are no blog posts :-(</h2>
+        </div>
+    }
+}
+@section scripts
+{
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            var cnt = $("#BlogPost_Like").val();
+            var blogPostId = $("#BlogPostId").val();
+            $("#btn_like").click(function () {
+                cnt++;
+                $("#BlogPost_Like").val(cnt);
+                $.ajax({
+                    type: 'Post',
+                    dataType: 'Json',
+                    data: { "blogPostId": blogPostId, "blogLike": $("#BlogPost_Like").val() },
+                    url: '@Url.Action("Check", "BlogPost")',
+                    async: true,
+                    success: function () {
+                        alert("success");
+                    },
+                    error: function () {
+                        alert("error");
+                    }
+                });
+            });
+            $("#Login").hide();
+
+            $("#btn_Comment").click(function () {
+                alert("Hi");
+                $("#login").html("Please <a href=/Login > Login</a> to Comment.......");
+
+            });
+            $("#btn_Login").click(function () {
+
+                var Logindata =
+                {
+                    UserEmailid: $("#UserName").val(),
+                    Password: $("#UserPwd").val()
+                };
+                $.ajax({
+                    type: 'Post',
+                    dataType: 'Json',
+                    data: { "authorinfo": Logindata, page: "comment" },
+                    url: '@Url.Action("Login", "Login")',
+                    async: true,
+                    success: function () {
+
+                        $("#commentsBlock").show();
+                        $("#Login").hide();
+
+                    },
+                    error: function () {
+                        alert("error: Please check username/password");
+                    }
+                });
+            });
+            $("#btn_createcomment").click(function () {
+
+                var postId = $(this).attr('data-id');
+                var commentMsg = $('#comment_' + postId).val();
+                $.ajax({
+                    type: 'Post',
+                    data: { "commentMsg": commentMsg, "postId": postId }
+                    ,
+                    url: '@Url.Action("Create", "Comment")',
+                    success: function (response) {
+                        $('div[class=allComments_' + postId + ']').remove();
+
+                        var allCommentsArea = $('<div>').addClass('allComments_' + postId);
+                        allCommentsArea.html(response);
+
+                        allCommentsArea.prependTo('#commentsBlock_' + postId);
+                        $('#comment_' + postId).val("");
+                    },
+                    error: function (response) {
+                        alert('Sorry: Something Wrong');
+                    }
+
+                });
+
+            });
+
+            $("#btn_showcomment").on('click', function () {
+
+                var id = $(this).attr("data-id");
+                var allCommentsArea = $('<div>').addClass('allComments_' + id);
+
+                //function that allow us to get all comments related to post id
+                $.ajax({
+
+                    type: 'GET',
+                    url: '@Url.Action("GetComments", "Comment")',
+                    data: { postId: id },
+                    success: function (response) {
+
+                        if ($('div').hasClass('allComments_' + id + '')) {
+                            $('div[class=allComments_' + id + ']').remove();
+                        }
+
+                        allCommentsArea.html(response);
+                        allCommentsArea.prependTo('#commentsBlock_' + id);
+                        $('#comment_' + id).val("");
+
+                    },
+                    error: function (response) {
+                        allCommentsArea.html("No Comments to Load");
+                        alert('Sorry: Comments cannot be loaded !');
+                    }
+
+
+                })
+
+            });
+            $("#deletepost").click(function () {
+                var blogpostId = $(this).attr('data-id');
+                var answer = confirm("Are you sure you want to delete this file?" + blogpostId);
+               
+                if (answer) {
+
+                    $.ajax({
+                        type: 'Post',
+                        dataType: 'Json',
+                        data: { blogpostId },
+                        url: '@Url.Action("DeleteBlogPost", "BlogPost")',
+                        async: true,
+                        success: function (response) {
+
+                            alert("Record Deleted");
+                            window.location = response.url;
+                        },
+                        error: function (response) {
+                            alert("Record not Deleted");
+                        }
+                    });
+                }
+
+            });
+        });
+    </script>
+}

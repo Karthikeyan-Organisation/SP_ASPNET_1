@@ -1,0 +1,60 @@
+﻿@model SP_ASPNET_1.Models.Author
+
+@{
+    ViewBag.Title = "Login";
+
+}
+
+<h2>Login</h2>
+
+@if (TempData["MessageLogin"] != null)
+{
+    <p class="alert alert-danger" id="successMessage">@TempData["MessageLogin"] </p>
+}
+
+@if (TempData["LoginError"] != null)
+{
+    <p class="alert alert-danger" id="successMessage">@TempData["LoginError"] </p>
+}
+
+@if (TempData["MessageRegister"] != null)
+{
+    <p class="alert alert-danger" id="successMessage">@TempData["MessageRegister"] </p>
+}
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <div class="form-group">
+            @Html.LabelFor(model => model.UserEmailid, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.TextBoxFor(model => model.UserEmailid, new { htmlAttributes = new { @class = "form-control", placeholder = "Enter EmailId" } })
+                @Html.ValidationMessageFor(model => model.UserEmailid, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Password, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.PasswordFor(model => model.Password, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Login" class="btn btn-default" /> <br /> <br />
+                @Html.ActionLink("Create Account", "Register", new { @class = "btn btn-info" })
+
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+

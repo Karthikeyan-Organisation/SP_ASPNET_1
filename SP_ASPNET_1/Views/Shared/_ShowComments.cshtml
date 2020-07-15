@@ -1,0 +1,97 @@
+﻿@model IQueryable<SP_ASPNET_1.Models.BlogPostComment>
+@using SP_ASPNET_1.Models
+
+
+
+@if (Model.Any())
+{
+
+    foreach (BlogPostComment comment in Model)
+    {
+        <div class="row" id="@string.Format("{0}_{1}","CommentsBlock",comment.BlogPostCommentId)" style="width: 100.3%; border-bottom: 1px solid #d2cece; margin-right: -14px; margin-left: -1px;">
+
+            <div class="col-md-4" style="width: 21%;">
+                <div class="userProfil" style="margin-left: 9px; margin-top: 12px;">
+                    @*<img src="~/Images/@comment.Author.Name" class="img-circle" style="width: 46px; height: 53px; border: 1px solid #bcb8b8;" />*@
+                    <a href="#" style="margin-left: 5px; font-weight: bold; font-size: 13px;"> @comment.Author.Name </a>
+
+                </div>
+            </div>
+
+            <div class="col-md-7" style="width: 60%;">
+                <div class="commentDetails">
+                    <p style="margin-top: 27px; font-size: 13px; color: #9c9898;"> @comment.Comments </p>
+                    @if ((int)Session["UserId"] == comment.AuthorID)
+                    {
+                        <a href="#" class="Delete" id="deletecomment" data-id="@comment.BlogPostCommentId" onclick="removeFile(); return false;">Delete</a>
+                    <button type="button" id="btn_deletecomment" class="btn btn-default" data-id="@comment.BlogPostCommentId" value="Delete">Delete</button>}
+                    @*<div class="@string.Format("{0}_{1}", "ReplayComments", comment.BlogPostCommentId)" style="display:none;">
+
+
+                            <div class="ReplayCommentInput" style="margin-left: 3%;  margin-bottom: 5px; margin-top: 8px;">
+                                <input type="text" id="@string.Format("{0}_{1}", "inputReplay", comment.BlogPostCommentId)" class="form-control" placeholder="Add a Comment ..." style="display: inline;" />
+                                <button type="button" class="btn btn-default ReplyAddComment" data-id="@comment.BlogPostCommentId"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span></button>
+                            </div>
+
+                        </div>*@
+
+                </div>
+            </div>
+            <div class="col-md-1" style="width: 19%;">
+                <div class="commentDate">
+                    <span class="glyphicon glyphicon-time" aria-hidden="true"></span>
+                    <time class="timeago" style="margin-top: 27px; font-size: 13px; color: #9c9898;  margin-left: 4px;" datetime="@comment.DateTime">@comment.DateTime</time>
+
+                </div>
+            </div>
+        </div>
+
+    }
+
+}
+else
+{
+<div class="row" style="width: 100.3%; border-bottom: 1px solid #d2cece; margin-right: -14px; margin-left: -1px;">
+    <div class="commentDetails">
+        <div class="col-md-4" style="width: 50%;">
+            <p>  No Comments for this Post......</p>
+
+        </div>
+        </div>
+    </div>
+ }
+
+ <script type="text/javascript">
+     $(document).ready(function () {
+         $("#btn_deletecomment").click(function () {
+             var answer = confirm("Are you sure you want to delete this Comment?");
+             var commentpostId = $(this).attr('data-id');
+             var allCommentsArea = $('<div>').addClass('allComments_' + commentpostId);
+             if (answer) {
+
+                 $.ajax({
+                     type: 'Post',
+                     dataType: 'Json',
+                     data: { commentpostId },
+                     url: '@Url.Action("DeleteComments", "Comment")',
+                     async: true,
+
+                     success: function (result) {
+                         $('div[class=CommentsBlock_' + commentpostId + ']').remove();
+                         alert("Deleted");
+                         $('div[class=CommentsBlock_' + commentpostId + ']').html(result);
+                         allCommentsArea.prependTo('#commentsBlock_' + postId);
+                         $('#comment_' + id).val("");
+
+                     },
+                     failure: function () {
+                         alert("Not Deleted");
+                     }
+                 });
+             }
+
+         });
+     });
+    </script>
+
+

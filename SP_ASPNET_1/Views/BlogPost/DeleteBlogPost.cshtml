@@ -1,0 +1,96 @@
+﻿@model SP_ASPNET_1.Models.BlogPost
+
+@{
+    ViewBag.Title = "Delete";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Delete</h2>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4>BlogPost</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Title)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Title)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DateTime)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DateTime)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Content)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Content)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ImageUrl)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ImageUrl)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Like)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Like)
+        </dd>
+
+    </dl>
+
+    @using (Html.BeginForm("DeleteBlogPost", "BlogPost", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <input type="button" id="btn-delete"value="Delete" class="btn btn-default" data-id="@Model.BlogPostID" /> |
+            @Html.ActionLink("Back to List", "Index")
+        </div>
+    }
+</div>
+
+@section scripts
+{
+ <script type="text/javascript">
+    $(document).ready(function () {
+        $("#btn-delete").click(function () {
+            var answer = confirm("Are you sure you want to delete this file?");
+            var blogpostId = $(this).attr('data-id');
+            if (answer) {
+
+                $.ajax({
+                    type: 'Post',
+                    dataType: 'Json',
+                    data: {blogpostId },
+                    url: '@Url.Action("DeleteBlogPost", "BlogPost")',
+                    async: true,
+                    success: function (response) {
+
+                        alert("Record Deleted");
+                        window.location = response.url;
+                    },
+                    error: function (response) {
+                        alert('Sorry: Something Wrong');
+                    }
+                });
+            }
+        });
+        </script>
+    }
+

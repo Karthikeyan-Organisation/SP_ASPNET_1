@@ -1,0 +1,78 @@
+﻿@using SP_ASPNET_1.BusinessLogic
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title @(ViewBag.Title != null ? "-" : "") .NET Developer Challenge</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Scripts/jquery.validate.unobtrusive.js"></script>
+
+</head>
+<body>
+  
+<header class="header">
+<div class="header__navbar">
+<img #logo src="~/Content/images/logo.png" /> <span class="spacer"></span>
+<nav>
+    <ul>
+        <li><a href="@Url.Action("Index", "Home")" class="@(@Html.IsActive("Home", "Index"))">HOME</a></li>
+        <li>
+            <a href="@Url.Action("About", "Home")" class="@(@Html.IsActive("Home", "About"))">ABOUT</a>
+            <ul>
+                <li><a href="@Url.Action("Product", "Home")" class="@(@Html.IsActive("Home", "Product"))">PRODUCT</a></li>
+            </ul>
+        </li>
+        <li>
+            <a href="@Url.Action("Index", "BlogPost")" class="@(@Html.IsActive("BlogPost", "Index"))">BLOG</a>
+
+            <ul style="z-index: 999;">
+                <li><a href="@Url.Action("RandomPost", "BlogPost")" class="@(@Html.IsActive("BlogPost", "RandomPost"))">RANDOM POST</a></li>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    if (User.IsInRole("Admin") || User.IsInRole("Author"))
+                    {
+                        <li><a href="@Url.Action("Create", "BlogPost")" class="@(@Html.IsActive("Create", "BlogPost"))">CREATE BLOG</a></li>
+}
+                }
+            </ul>
+        </li>
+        <li><a href="@Url.Action("Contact", "Home")" class="@(@Html.IsActive("Home", "Contact"))">CONTACT</a></li>
+        @if (User.Identity.IsAuthenticated)
+        {
+            if (User.IsInRole("Admin"))
+            {
+                <li> <a href="@Url.Action("RoleAssign", "Admin")" class="@(@Html.IsActive("Admin", "RoleAssign"))">ADMIN</a> </li>
+             }
+            <li><a href="@Url.Action("Logout", "Login")" class="@(@Html.IsActive("Logout", "Login"))">LOGOUT</a></li>
+ }
+        else
+        {
+            <li><a href="@Url.Action("Login", "Login")" class="@(@Html.IsActive("Login", "Login"))">LOGIN</a></li>
+}
+    </ul><p style="text-align:right">@User.Identity.Name @Session["UserName"]</p>
+
+</nav>
+</div>
+
+</header>
+@RenderBody()
+<footer>
+<div>
+<div class="container">
+<div class="social">
+<a href="#" class="facebook"></a>
+<a href="#" class="googleplus"></a>
+<a href="#" class="pinterest"></a> <a href="#" class="twitter"></a>
+</div>
+<p>© 2020 BBS</p>
+</div>
+</div>
+</footer>
+@RenderSection("scripts", required: false)
+</body>
+</html>
